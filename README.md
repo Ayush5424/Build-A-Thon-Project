@@ -33,4 +33,6 @@ detects gestures, and triggers system actions automatically.
 - OpenCV – Frame handling  
 - WebSockets – Real-time browser ↔ Python communication  
 - PyAutoGUI – System control (scrolling, app switching, etc.)  
-- TailwindCSS + JavaScript – Clean UI in browser  
+- TailwindCSS + JavaScript – Clean UI in browser
+
+  Live Site : https://ayush5424.github.io/Build-A-Thon-Project/
