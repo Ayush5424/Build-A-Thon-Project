@@ -1,4 +1,4 @@
-# 🖐️ Touchless Computer Control 4.0
+# 🖐️ Touchless Computer Control 
 
 Control your computer without touching the mouse or keyboard!  
 This project uses MediaPipe Hands + OpenCV + WebSockets + PyAutoGUI  
