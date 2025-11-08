@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Touchless Control Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex flex-col items-center justify-center">
+  <h1 class="text-3xl font-bold mb-4">🖐 Touchless Computer Control</h1>
+  <p class="text-slate-400 mb-8">Control your system using hand gestures via MediaPipe + WebSocket</p>
+
+  <!-- Webcam -->
+  <video id="webcam" autoplay playsinline class="rounded-2xl shadow-lg w-[640px] h-[480px] border border-slate-700"></video>
+
+  <!-- Buttons -->
+  <div class="flex gap-4 mt-4">
+    <button id="startBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-semibold">
+      ▶ Start Gesture Control
+    </button>
+    <button id="stopBtn" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl font-semibold">
+      ⏹ Stop
+    </button>
+  </div>
+
+  <!-- Gesture Cards -->
+  <div id="gestureList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-8 max-w-5xl">
+    <div class="gesture-card bg-slate-800 p-4 rounded-2xl text-center transition-all">✋ Four Fingers (Next App)</div>
+    <div class="gesture-card bg-slate-800 p-4 rounded-2xl text-center transition-all">✊ Fist (Play/Pause)</div>
+    <div class="gesture-card bg-slate-800 p-4 rounded-2xl text-center transition-all">👍 Thumb Only (Show Desktop)</div>
+    <div class="gesture-card bg-slate-800 p-4 rounded-2xl text-center transition-all">☝ Index Only (Scroll Up)</div>
+    <div class="gesture-card bg-slate-800 p-4 rounded-2xl text-center transition-all">✌ Index + Middle (Scroll Down)</div>
+    <div class="gesture-card bg-slate-800 p-4 rounded-2xl text-center transition-all">🤟 Index + Middle + Ring (Open App)</div>
+  </div>
+
+  <script>
+    // --- Webcam Setup ---
+    const videoElement = document.getElementById("webcam");
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    let stream = null;
+
+    async function startWebcam() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoElement.srcObject = stream;
+      } catch (err) {
+        alert("Camera access denied: " + err.message);
+      }
+    }
+
+    function stopWebcam() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+        videoElement.srcObject = null;
+      }
+    }
+
+    // --- Gesture WebSocket Setup ---
+    const GESTURE_SERVER_URL = "ws://localhost:8765";
+    let ws = null;
+    let frameInterval = null;
+
+    function connectToGestureServer() {
+      ws = new WebSocket(GESTURE_SERVER_URL);
+
+      ws.onopen = () => console.log("✅ Connected to gesture server.");
+      ws.onclose = () => console.warn("⚠️ Gesture server disconnected.");
+      ws.onerror = (err) => console.error("❌ WebSocket error:", err);
+
+      ws.onmessage = (event) => {
+        const gesture = event.data.trim();
+        console.log("🤖 Detected Gesture:", gesture);
+        highlightGestureCard(gesture);
+      };
+    }
+
+    function sendVideoFrame() {
+      if (!ws || ws.readyState !== WebSocket.OPEN || !videoElement) return;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.5); // compress for faster transmission
+      ws.send(dataUrl);
+    }
+
+    // --- Highlight the Gesture Card ---
+    function highlightGestureCard(gestureName) {
+      document.querySelectorAll('.gesture-card').forEach(card => {
+        card.classList.remove('ring-4', 'ring-emerald-400', 'scale-[1.03]');
+      });
+
+      if (!gestureName) return;
+      const match = Array.from(document.querySelectorAll('.gesture-card')).find(c =>
+        c.textContent.toLowerCase().includes(gestureName.toLowerCase())
+      );
+
+      if (match) {
+        match.classList.add('ring-4', 'ring-emerald-400', 'scale-[1.03]');
+      }
+    }
+
+    // --- Button Events ---
+    startBtn.addEventListener('click', async () => {
+      await startWebcam();
+      connectToGestureServer();
+      frameInterval = setInterval(sendVideoFrame, 200); // 5 FPS
+    });
+
+    stopBtn.addEventListener('click', () => {
+      stopWebcam();
+      if (ws) ws.close();
+      if (frameInterval) clearInterval(frameInterval);
+    });
+  </script>
+</body>
+</html>
