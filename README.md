@@ -1,30 +1,36 @@
-**Touchless Computer Control**
+# 🖐️ Touchless Computer Control 4.0
 
-AI-Powered Gesture Interface for Hospitals, Factories & Labs
+Control your computer without touching the mouse or keyboard!  
+This project uses MediaPipe Hands + OpenCV + WebSockets + PyAutoGUI  
+to recognize hand gestures in real time and perform system actions like scrolling, switching apps, or showing the desktop.
 
-Control your computer without touching keyboard or mouse  perfect for sterile, hazardous, or hands-busy environments.
-Built using Python, OpenCV, MediaPipe Hands, and PyAutoGUI.
+# Overview
 
-Features
+Touchless Computer Control allows users — especially doctors, factory workers, or lab technicians —  
+to interact with their computers in sterile or hands-free environments using simple hand gestures.
 
-🖐 Palm → Next Slide (Alt + Right Arrow / Custom)
+It works through a browser + Python WebSocket server that communicates video frames,  
+detects gestures, and triggers system actions automatically.
 
-✊ Fist → Play / Pause (Space)
 
-👍 Thumb Up → Confirm / OK
+#✋ Supported Gestures & Actions
 
-✌ Two Fingers → Scroll / Navigation
+| Gesture  | Description                      | Action |                                           |
+|----------|----------------------------------|--------|------------------------------------------ |
+| 🖐️ Palm (All Fingers)        | All fingers extended              | Switch App (Alt + Tab)        | 
+| ✊ Fist (No Fingers)         | All fingers closed                | Play / Pause (Space)          |
+| 👍 Thumbs Up                 | Only thumb raised                 | Show Desktop (Win + D)        |
+| ✌️ Two Fingers               | Index + Middle raised             | Scroll Down                   |
+| ☝️ One Finger                | Index finger raised               | Scroll Up                     |
+| 🤟 Index + Thumb             | Index and thumb extended          | Scroll Right                  |
+| 🤘 Three Fingers             | Index + Middle + Ring extended    | Open App (file path)          |
 
-☝ One Finger → (More gestures coming…)
 
-Supports real-time detection at 30+ FPS depending on system performance.
+# Tech Stack
 
-**Tech Stack**
-
-Hand Tracking	-> MediaPipe Hands
-
-Computer Vision ->	OpenCV
-
-System Control ->	PyAutoGUI
-
-Language	-> Python
+- Python 3.10+
+- MediaPipe – Hand tracking & landmarks detection  
+- OpenCV – Frame handling  
+- WebSockets – Real-time browser ↔ Python communication  
+- PyAutoGUI – System control (scrolling, app switching, etc.)  
+- TailwindCSS + JavaScript – Clean UI in browser  
